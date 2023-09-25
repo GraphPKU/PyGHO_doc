@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiple Tensor &mdash; PyGHO 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pygho.backend package" href="../modules/backend.html" />
+    <link rel="prev" title="Operators" href="operator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyGHO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miniexample.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datastructure.html">Basic Data Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hodata.html">Efficient High Order Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operator.html">Operators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Tutorial</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multiple Tensor</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/backend.html">pygho.backend package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/hodata.html">pygho.hodata package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/honn.html">pygho.honn package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGHO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Multiple Tensor</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/multtensor.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multiple-tensor">
+<span id="multi-tensor-tutorial-label"></span><h1>Multiple Tensor<a class="headerlink" href="#multiple-tensor" title="Link to this heading"></a></h1>
+<p>In our dataset preprocessing routine, the default computation involves
+two high-order tensors: the adjacency matrix <code class="docutils literal notranslate"><span class="pre">A</span></code> and the tuple feature
+<code class="docutils literal notranslate"><span class="pre">X</span></code>. However, in certain scenarios, there may be a need for additional
+high-order tensors. For instance, when using a Nested Graph Neural
+Network (GNN) with a 2-hop GNN as the base GNN, Message Passing Neural
+Network (MPNN) operations are performed on each subgraph with an
+augmented adjacency matrix. In this case, two high-order tensors are
+required: the tuple feature and the augmented adjacency matrix.</p>
+<p>During data preprocessing, we can use multiple samplers, each
+responsible for sampling one tensor. For sparse data, the code might
+look like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+    <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span> <span class="n">trn_dataset</span><span class="p">,</span>
+    <span class="n">pre_transform</span><span class="o">=</span><span class="n">Sppretransform</span><span class="p">(</span>
+        <span class="n">tuplesamplers</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+            <span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tuplefeat&quot;</span><span class="p">,</span> <span class="s2">&quot;2hopadj&quot;</span><span class="p">],</span>
+        <span class="n">keys</span><span class="o">=</span><span class="n">keys</span>
+    <span class="p">),</span>
+    <span class="n">num_workers</span><span class="o">=</span><span class="mi">8</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>In this code, two tuple features are precomputed simultaneously and
+assigned different annotations: “tuplefeat” and “2hopadj” to distinguish
+between them.</p>
+<p>For dense data, the process is quite similar:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+    <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span>
+    <span class="n">trn_dataset</span><span class="p">,</span>
+    <span class="n">pre_transform</span><span class="o">=</span><span class="n">Mapretransform</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">partial</span><span class="p">(</span><span class="n">spdsampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+            <span class="n">partial</span><span class="p">(</span><span class="n">spdsampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tuplefeat&quot;</span><span class="p">,</span> <span class="s2">&quot;2hopadj&quot;</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">num_worker</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>After passing the data through a dataloader, the batch will contain
+<code class="docutils literal notranslate"><span class="pre">Xtuplefeat</span></code> and <code class="docutils literal notranslate"><span class="pre">X2hopadj</span></code> as the high-order tensors that are
+needed. For dense models, this concludes the process. However, for
+sparse models, if you want to retrieve the correct keys, you will need
+to modify the operator symbols for sparse message passing layers.</p>
+<p>Ordinarily, the <code class="docutils literal notranslate"><span class="pre">NGNNConv</span></code> is defined as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NGNNConv</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">mlp</span><span class="o">=</span><span class="n">mlp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NGNNConv</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">mlp</span><span class="o">=</span><span class="n">mlp</span><span class="p">,</span> <span class="n">optuplefeat</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">opadj</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To ensure that you retrieve the correct keys, you should use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NGNNConv</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">mlp</span><span class="o">=</span><span class="n">mlp</span><span class="p">,</span> <span class="n">optuplefeat</span><span class="o">=</span><span class="s2">&quot;Xtuplefeat&quot;</span><span class="p">,</span> <span class="n">opadj</span><span class="o">=</span><span class="s2">&quot;X2hopadj&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Similar modifications should be made for other layers as needed.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="operator.html" class="btn btn-neutral float-left" title="Operators" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/backend.html" class="btn btn-neutral float-right" title="pygho.backend package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, GraphPKU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

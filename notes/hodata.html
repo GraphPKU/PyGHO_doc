@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Efficient High Order Data Processing &mdash; PyGHO 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Operators" href="operator.html" />
+    <link rel="prev" title="Basic Data Structure" href="datastructure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyGHO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miniexample.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datastructure.html">Basic Data Structure</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Efficient High Order Data Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-high-order-features-to-pyg-dataset">Adding High Order Features to PyG Dataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#efficient-high-order-feature-precomputation">Efficient High-Order Feature Precomputation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#defining-custom-tuple-samplers">Defining Custom Tuple Samplers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-multiple-tuple-samplers">Using Multiple Tuple Samplers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sparse-sparse-matrix-multiplication-precomputation">Sparse-Sparse Matrix Multiplication Precomputation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sparse-tensor-data">Sparse Tensor Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#masked-tensor-data">Masked Tensor Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="operator.html">Operators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multtensor.html">Multiple Tensor</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/backend.html">pygho.backend package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/hodata.html">pygho.hodata package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/honn.html">pygho.honn package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGHO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Efficient High Order Data Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/hodata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="efficient-high-order-data-processing">
+<span id="hodata-label"></span><h1>Efficient High Order Data Processing<a class="headerlink" href="#efficient-high-order-data-processing" title="Link to this heading"></a></h1>
+<p>In this section, we’ll delve into the efficient high-order data
+processing capabilities provided by PyGHO, particularly focusing on the
+handling of high-order tensors, tuple feature precomputation, and data
+loading strategies for both sparse and masked tensor data structures.</p>
+<section id="adding-high-order-features-to-pyg-dataset">
+<h2>Adding High Order Features to PyG Dataset<a class="headerlink" href="#adding-high-order-features-to-pyg-dataset" title="Link to this heading"></a></h2>
+<p>HOGNNs and MPNNs share common tasks, allowing us to leverage PyTorch
+Geometric’s (PyG) data processing routines. However, to cater to the
+unique requirements of HOGNNs, PyGHO significantly extends these
+routines while maintaining compatibility with PyG. This extension
+ensures convenient high-order feature precomputation and preservation.</p>
+<section id="efficient-high-order-feature-precomputation">
+<h3>Efficient High-Order Feature Precomputation<a class="headerlink" href="#efficient-high-order-feature-precomputation" title="Link to this heading"></a></h3>
+<p>High-order feature precomputation can be efficiently conducted in
+parallel using the PyGHO library. Consider the following example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ordinary PyG dataset</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.datasets</span> <span class="kn">import</span> <span class="n">ZINC</span>
+<span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ZINC</span><span class="p">(</span><span class="s2">&quot;dataset/ZINC&quot;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="c1"># High-order graph dataset</span>
+<span class="kn">from</span> <span class="nn">pygho.hodata</span> <span class="kn">import</span> <span class="n">Sppretransform</span><span class="p">,</span> <span class="n">ParallelPreprocessDataset</span>
+<span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+        <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span> <span class="n">trn_dataset</span><span class="p">,</span>
+        <span class="n">pre_transform</span><span class="o">=</span><span class="n">Sppretransform</span><span class="p">(</span><span class="n">tuplesamplers</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">),</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">ParallelPreprocessDataset</span></code> class takes an ordinary PyG dataset as
+input and performs transformations on each graph in parallel (utilizing
+8 processes in this example). The <code class="docutils literal notranslate"><span class="pre">tuplesamplers</span></code> parameter represents
+functions that take a graph as input and produce a sparse tensor. You
+can apply multiple samplers simultaneously, and the resulting output can
+be assigned specific names using the <code class="docutils literal notranslate"><span class="pre">annotate</span></code> parameter. In this
+example, we utilize <code class="docutils literal notranslate"><span class="pre">partial(KhopSampler,</span> <span class="pre">hop=3)</span></code>, a sampler designed
+for NGNN, to sample a 3-hop ego-network rooted at each node. The
+shortest path distance to the root node serves as the tuple features.
+The produced SparseTensor is then saved and can be effectively used to
+initialize tuple representations.</p>
+<p>Since the dataset preprocessing routine is closely related to data
+structures, we have designed two separate routines for sparse and dense
+tensors. These routines only differ in the <code class="docutils literal notranslate"><span class="pre">pre_transform</span></code> function.
+For dense tensors, we can simply use
+<code class="docutils literal notranslate"><span class="pre">Mapretransform(None,</span> <span class="pre">tuplesamplers)</span></code>. In this case, the
+<code class="docutils literal notranslate"><span class="pre">tuplesamplers</span></code> is a function producing dense tuple features. In <a class="reference internal" href="../modules/hodata.html#module-pygho.hodata.MaTupleSampler" title="pygho.hodata.MaTupleSampler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.hodata.MaTupleSampler</span></code></a> We provide <code class="docutils literal notranslate"><span class="pre">spdsampler</span></code> and
+<code class="docutils literal notranslate"><span class="pre">rdsampler</span></code> to compute shortest path distance and resisitance distance
+between nodes. One example is</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span><span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span>
+                                            <span class="n">trn_dataset</span><span class="p">,</span>
+                                            <span class="n">pre_transform</span><span class="o">=</span><span class="n">Mapretransform</span><span class="p">(</span>
+                                                <span class="n">partial</span><span class="p">(</span><span class="n">spdsampler</span><span class="p">,</span>
+                                                              <span class="n">hop</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
+                                            <span class="n">num_worker</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="defining-custom-tuple-samplers">
+<h3>Defining Custom Tuple Samplers<a class="headerlink" href="#defining-custom-tuple-samplers" title="Link to this heading"></a></h3>
+<p>In addition to the provided tuple samplers, you can define your own
+tuple sampler. For sparse data, a sampler is a function or callable
+object that takes a <code class="docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code> object as input and
+produces a sparse tensor as output. Here’s an example of a custom sparse
+tuple sampler that assigns <code class="docutils literal notranslate"><span class="pre">0</span></code> as a feature for each tuple <code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">i)</span></code>
+in the graph:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">SparseToySampler</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">PygData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseTensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sample k-hop subgraph on a given PyG graph.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">    - data (PygData): The input PyG data.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    - SparseTensor for the precomputed tuple features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">num_nodes</span>
+    <span class="n">tupleid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span>
+    <span class="n">tuplefeat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,))</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">tupleid</span><span class="p">,</span> <span class="n">tuplefeat</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+</div>
+<p>For dense data, a sampler is a function or callable object that takes a
+<code class="docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code> object as input and produces a tensor
+along with the masked shape of the features. Here’s a custom dense tuple
+sampler that assigns <code class="docutils literal notranslate"><span class="pre">0</span></code> as a feature for each tuple <code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">i)</span></code> in the
+graph:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">DenseToySampler</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">PygData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sample k-hop subgraph on a given PyG graph.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">    - data (PygData): The input PyG data.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    - Tensor: The precomputed tuple features.</span>
+<span class="sd">    - List[int]: The masked shape of the features.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">num_nodes</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">val</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Please note that for dense data, the function returns a tuple consisting
+of the value and the masked shape, as opposed to returning a
+MaskedTensor. This is because the mask can typically be inferred from
+the feature itself, making it unnecessary to explicitly include it in
+the returned data. In such cases, the mask can be determined as val ==
+1 .</p>
+</section>
+<section id="using-multiple-tuple-samplers">
+<h3>Using Multiple Tuple Samplers<a class="headerlink" href="#using-multiple-tuple-samplers" title="Link to this heading"></a></h3>
+<p>You can use multiple tuple samplers simultaneously. For instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+        <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span> <span class="n">trn_dataset</span><span class="p">,</span>
+        <span class="n">pre_transform</span><span class="o">=</span><span class="n">Sppretransform</span><span class="p">(</span><span class="n">tuplesamplers</span><span class="o">=</span><span class="p">[</span><span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">2</span><span class="p">)],</span> <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;1hop&quot;</span><span class="p">,</span> <span class="s2">&quot;2hop&quot;</span><span class="p">],</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">),</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This code precomputes two tuple features simultaneously and assigns them
+different annotations, “1hop” and “2hop,” to distinguish between them.</p>
+<p>For dense, it works similarly</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+    <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span>
+    <span class="n">trn_dataset</span><span class="p">,</span>
+    <span class="n">pre_transform</span><span class="o">=</span><span class="n">Mapretransform</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">partial</span><span class="p">(</span><span class="n">spdsampler</span><span class="p">,</span><span class="n">hop</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">partial</span><span class="p">(</span><span class="n">spdsampler</span><span class="p">,</span><span class="n">hop</span><span class="o">=</span><span class="mi">2</span><span class="p">)],</span>
+        <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;1hop&quot;</span><span class="p">,</span><span class="s2">&quot;2hop&quot;</span><span class="p">]),</span>
+        <span class="n">num_worker</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="sparse-sparse-matrix-multiplication-precomputation">
+<h3>Sparse-Sparse Matrix Multiplication Precomputation<a class="headerlink" href="#sparse-sparse-matrix-multiplication-precomputation" title="Link to this heading"></a></h3>
+<p>Efficient Sparse-Sparse Matrix Multiplication in our library can be
+achieved through precomputation. The <code class="docutils literal notranslate"><span class="pre">keys</span></code> parameter in
+<code class="docutils literal notranslate"><span class="pre">Sppretransform</span></code> is a list of strings, where each string indicates a
+specific precomputation. For example, consider the key:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;X___A___1___X___0&quot;</span>
+</pre></div>
+</div>
+<p>Here, the precomputation involves sparse matrix multiplication
+<span class="math notranslate nohighlight">\(AX\)</span>, but only computes the output elements that exist in
+<span class="math notranslate nohighlight">\(X\)</span>. These precomputation results can be shared among matrices
+with the same indices. The key elements signify the following: - The
+first <code class="docutils literal notranslate"><span class="pre">X</span></code> refers to the target sparse matrix indices. - <code class="docutils literal notranslate"><span class="pre">A</span></code> and
+<code class="docutils literal notranslate"><span class="pre">X</span></code> represent the matrices involved in the multiplication, the
+adjacency matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>, and the tuple feature <code class="docutils literal notranslate"><span class="pre">X</span></code>. - <code class="docutils literal notranslate"><span class="pre">1</span></code> denotes
+that dimension <code class="docutils literal notranslate"><span class="pre">1</span></code> of <code class="docutils literal notranslate"><span class="pre">A</span></code> will be reduced. - <code class="docutils literal notranslate"><span class="pre">0</span></code> signifies that
+dimension <code class="docutils literal notranslate"><span class="pre">0</span></code> of <code class="docutils literal notranslate"><span class="pre">X</span></code> will be reduced.</p>
+<p>You don’t need to manually feed the precomputation results to the model.
+Converting the batch to a dictionary and using it as the <code class="docutils literal notranslate"><span class="pre">datadict</span></code>
+parameter is sufficient:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+    <span class="n">datadict</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Dense data does not require precomputation currently.</p>
+<p>If you use annotate in transformation, for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sppretransform</span><span class="p">(</span><span class="n">tuplesamplers</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;1hop&quot;</span><span class="p">],</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then the key can be</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;X1hop___A___1___X1hop___0&quot;</span>
+</pre></div>
+</div>
+<p>More details are shown in <a class="reference internal" href="multtensor.html#multi-tensor-tutorial-label"><span class="std std-ref">Multiple Tensor</span></a>
+Mini-batch and DataLoader</p>
+<p>Enabling batch training in HOGNNs demands handling graphs of varying
+sizes, which presents a challenge. We employ different strategies for
+Sparse and Masked Tensor data structures.</p>
+</section>
+<section id="sparse-tensor-data">
+<h3>Sparse Tensor Data<a class="headerlink" href="#sparse-tensor-data" title="Link to this heading"></a></h3>
+<p>For Sparse Tensor data, we adopt a relatively straightforward solution.
+We concatenate the tensors of each graph along the diagonal of a larger
+tensor. For example, in a batch of <span class="math notranslate nohighlight">\(B\)</span> graphs with adjacency
+matrices <span class="math notranslate nohighlight">\(A_i\in \mathbb{R}^{n_i\times n_i}\)</span>, node features
+<span class="math notranslate nohighlight">\(x\in \mathbb{R}^{n_i\times d}\)</span>, and tuple features
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{n_i\times n_i\times d'}\)</span> for
+<span class="math notranslate nohighlight">\(i=1,2,\ldots,B\)</span>, the features for the entire batch are
+represented as <span class="math notranslate nohighlight">\(A\in \mathbb{R}^{n\times n}\)</span>,
+<span class="math notranslate nohighlight">\(x\in \mathbb{R}^{n\times d}\)</span>, and
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{n\times n\times d'}\)</span>, where
+<span class="math notranslate nohighlight">\(n=\sum_{i=1}^B n_i\)</span>. This arrangement allows tensors in batched</p>
+<p>data to have the same number of dimensions as those of a single graph,
+facilitating the sharing of common operators.</p>
+<p>We provide PygHO’s own DataLoader to simplify this process:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pygho.subgdata</span> <span class="kn">import</span> <span class="n">SpDataloader</span>
+<span class="n">trn_dataloader</span> <span class="o">=</span> <span class="n">SpDataloader</span><span class="p">(</span><span class="n">trn_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="masked-tensor-data">
+<h3>Masked Tensor Data<a class="headerlink" href="#masked-tensor-data" title="Link to this heading"></a></h3>
+<p>As concatenation along the diagonal leads to a lot of non-existing
+elements, handling Masked Tensor data involves a different strategy for
+saving space. In this case, tensors are padded to the same shape and
+stacked along a new axis. For instance, in a batch of <span class="math notranslate nohighlight">\(B\)</span> graphs
+with adjacency matrices <span class="math notranslate nohighlight">\(A_i\in \mathbb{R}^{n_i\times n_i}\)</span>, node
+features <span class="math notranslate nohighlight">\(x\in \mathbb{R}^{n_i\times d}\)</span>, and tuple features
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{n_i\times n_i\times d'}\)</span> for
+<span class="math notranslate nohighlight">\(i=1,2,\ldots,B\)</span>, the features for the entire batch are
+represented as
+<span class="math notranslate nohighlight">\(A\in \mathbb{R}^{B\times \tilde{n}\times \tilde{n}}\)</span>,
+<span class="math notranslate nohighlight">\(x\in \mathbb{R}^{B\times \tilde{n}\times d}\)</span>, and
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{B\times \tilde{n}\times \tilde{n}\times d'}\)</span>,
+where <span class="math notranslate nohighlight">\(\tilde{n}=\max\{n_i|i=1,2,\ldots,B\}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A=\begin{bmatrix}
+     \begin{pmatrix}
+         A_1&amp;0_{n_1,\tilde n-n_1}\\
+         0_{\tilde n-n_1, n_1}&amp;0_{n_1,n_1}\\
+     \end{pmatrix}\\
+     \begin{pmatrix}
+         A_2&amp;0_{n_2,\tilde n-n_2}\\
+         0_{\tilde n-n_2, n_2}&amp;0_{n_2,n_2}\\
+     \end{pmatrix}\\
+     \vdots\\
+     \begin{pmatrix}
+         A_B&amp;0_{n_B,\tilde n-n_B}\\
+         0_{\tilde n-n_B, n_B}&amp;0_{n_B,n_B}\\
+     \end{pmatrix}\\
+\end{bmatrix}
+,x=\begin{bmatrix}
+    \begin{pmatrix}
+         x_1\\
+         0_{\tilde n-n_1, d}\\
+     \end{pmatrix}\\
+    \begin{pmatrix}
+         x_2\\
+         0_{\tilde n-n_2, d}\\
+     \end{pmatrix}\\
+    \vdots\\
+    \begin{pmatrix}
+         x_B\\
+         0_{\tilde n-n_B, d}\\
+     \end{pmatrix}\\
+\end{bmatrix}
+,X=\begin{bmatrix}
+    \begin{pmatrix}
+         X_1&amp;0_{n_1,\tilde n-n_1}\\
+         0_{\tilde n-n_1, n_1}&amp;0_{n_1,n_1}\\
+     \end{pmatrix}\\
+     \begin{pmatrix}
+         X_2&amp;0_{n_2,\tilde n-n_2}\\
+         0_{\tilde n-n_2, n_2}&amp;0_{n_2,n_2}\\
+     \end{pmatrix}\\
+     \vdots\\
+     \begin{pmatrix}
+         X_B&amp;0_{n_B,\tilde n-n_B}\\
+         0_{\tilde n-n_B, n_B}&amp;0_{n_B,n_B}\\
+     \end{pmatrix}\\
+\end{bmatrix}\end{split}\]</div>
+<p>The 0 for padding will be masked in the result MaskedTensor.</p>
+<p>We also provide a DataLoader for this purpose:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pygho.subgdata</span> <span class="kn">import</span> <span class="n">MaDataloader</span>
+<span class="n">trn_dataloader</span> <span class="o">=</span> <span class="n">MaDataloader</span><span class="p">(</span><span class="n">trn_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This padding and stacking strategy ensures consistent shapes across
+tensors, allowing for efficient processing of dense data.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="datastructure.html" class="btn btn-neutral float-left" title="Basic Data Structure" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="operator.html" class="btn btn-neutral float-right" title="Operators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, GraphPKU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

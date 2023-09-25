@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimal Example &mdash; PyGHO 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Basic Data Structure" href="datastructure.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyGHO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Minimal Example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-preprocessing">Dataset Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mini-batch-and-dataloader">Mini-batch and DataLoader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#learning-methods-on-graphs">Learning Methods on Graphs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datastructure.html">Basic Data Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hodata.html">Efficient High Order Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="operator.html">Operators</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multtensor.html">Multiple Tensor</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/backend.html">pygho.backend package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/hodata.html">pygho.hodata package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/honn.html">pygho.honn package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGHO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Minimal Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/miniexample.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="minimal-example">
+<span id="miniexample-label"></span><h1>Minimal Example<a class="headerlink" href="#minimal-example" title="Link to this heading"></a></h1>
+<p>Let’s delve into the fundamental concepts of PyGHO using a minimal
+example. The complete code can be found in
+<a class="reference external" href="https://github.com/GraphPKU/PygHO/tree/main/example/minimal.py">example/minimal.py</a>.
+You can execute the code with the following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>minimal.py
+</pre></div>
+</div>
+<p>This example demonstrates the implementation of a basic HOGNN model
+<strong>Nested Graph Neural Network (NGNN)</strong> in the paper <a class="reference external" href="https://arxiv.org/abs/2110.13197">Nested Graph Neural
+Network (NGNN)</a>. NGNN works by
+first sampling a k-hop subgraph for each node <span class="math notranslate nohighlight">\(i\)</span> and then
+applying Graph Neural Networks (GNN) on all these subgraphs
+simultaneously. It generates a 2-D representation
+<span class="math notranslate nohighlight">\(H\in \mathbb{R}^{n\times n\times d}\)</span>, where <span class="math notranslate nohighlight">\(H_{ij}\)</span>
+represents the representation of node <span class="math notranslate nohighlight">\(j\)</span> in the subgraph rooted
+at node <span class="math notranslate nohighlight">\(i\)</span>. The message passing within all subgraphs can be
+expressed as:</p>
+<div class="math notranslate nohighlight">
+\[h_{ij}^{t+1} \leftarrow \sum_{k\in N_i(j)} \text{MLP}(h^t_{ik}),\]</div>
+<p>where <span class="math notranslate nohighlight">\(N_i(j)\)</span> represents the set of neighbors of node <span class="math notranslate nohighlight">\(j\)</span>
+in the subgraph rooted at <span class="math notranslate nohighlight">\(i\)</span>. After several layers of message
+passing, tuple representations <span class="math notranslate nohighlight">\(H\)</span> are pooled to generate the node
+representations:</p>
+<div class="math notranslate nohighlight">
+\[h_i = P(\{h_{ij} | j\in V_i\}).\]</div>
+<p>This example serves as a fundamental illustration of our work.</p>
+<section id="dataset-preprocessing">
+<h2>Dataset Preprocessing<a class="headerlink" href="#dataset-preprocessing" title="Link to this heading"></a></h2>
+<p>As HOGNNs share tasks with ordinary GNNs, they can utilize datasets
+provided by PyG. However, NGNN still needs to sample subgraphs,
+equivalent to providing initial features for tuple representation
+<span class="math notranslate nohighlight">\(h_{ij}\)</span>. You can achieve this transformation with the following
+code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load an ordinary PyG dataset</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.datasets</span> <span class="kn">import</span> <span class="n">ZINC</span>
+<span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ZINC</span><span class="p">(</span><span class="s2">&quot;dataset/ZINC&quot;</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+
+<span class="c1"># Transform it into a High-order graph dataset</span>
+<span class="kn">from</span> <span class="nn">pygho.hodata</span> <span class="kn">import</span> <span class="n">Sppretransform</span><span class="p">,</span> <span class="n">ParallelPreprocessDataset</span>
+<span class="n">trn_dataset</span> <span class="o">=</span> <span class="n">ParallelPreprocessDataset</span><span class="p">(</span>
+        <span class="s2">&quot;dataset/ZINC_trn&quot;</span><span class="p">,</span> <span class="n">trn_dataset</span><span class="p">,</span>
+        <span class="n">pre_transform</span><span class="o">=</span><span class="n">Sppretransform</span><span class="p">(</span><span class="n">tuplesamplers</span><span class="o">=</span><span class="p">[</span><span class="n">partial</span><span class="p">(</span><span class="n">KhopSampler</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">3</span><span class="p">)],</span> <span class="n">annotate</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">),</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">ParallelPreprocessDataset</span></code> class takes a standard PyG dataset as
+input and performs transformations on each graph in parallel, utilizing
+8 processes in this example. The <code class="docutils literal notranslate"><span class="pre">tuplesamplers</span></code> parameter represents
+functions that take a graph as input and produce a sparse tensor. In
+this example, we use <code class="docutils literal notranslate"><span class="pre">partial(KhopSampler,</span> <span class="pre">hop=3)</span></code>, a sampler designed
+for NGNN, to sample a 3-hop ego-network rooted at each node. The
+shortest path distance to the root node serves as the tuple features.
+The produced SparseTensor is then saved and can be effectively used to
+initialize tuple representations. The <code class="docutils literal notranslate"><span class="pre">keys</span></code> variable is a list of
+strings indicating the required precomputation, which can be
+automatically generated after defining a model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pygho.honn.SpOperator</span> <span class="kn">import</span> <span class="n">parse_precomputekey</span>
+<span class="n">keys</span> <span class="o">=</span> <span class="n">parse_precomputekey</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="mini-batch-and-dataloader">
+<h2>Mini-batch and DataLoader<a class="headerlink" href="#mini-batch-and-dataloader" title="Link to this heading"></a></h2>
+<p>Enabling batch training in HOGNNs requires handling graphs of varying
+sizes, which can be challenging. This library concatenates the
+SparseTensors of each graph along the diagonal of a larger tensor. For
+instance, in a batch of <span class="math notranslate nohighlight">\(B\)</span> graphs with adjacency matrices
+<span class="math notranslate nohighlight">\(A_i\in \mathbb{R}^{n_i\times n_i}\)</span>, node features
+<span class="math notranslate nohighlight">\(x\in \mathbb{R}^{n_i\times d}\)</span>, and tuple features
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{n_i\times n_i\times d'}\)</span> for
+<span class="math notranslate nohighlight">\(i=1,2,\ldots,B\)</span>, the features for the entire batch are
+represented as <span class="math notranslate nohighlight">\(A\in \mathbb{R}^{n\times n}\)</span>,
+<span class="math notranslate nohighlight">\(x\in \mathbb{R}^{n\times d}\)</span>, and
+<span class="math notranslate nohighlight">\(X\in \mathbb{R}^{n\times n\times d'}\)</span>, where
+<span class="math notranslate nohighlight">\(n=\sum_{i=1}^B n_i\)</span>. The concatenation is as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A=\begin{bmatrix}
+    A_1&amp;0&amp;0&amp;\cdots &amp;0\\
+    0&amp;A_2&amp;0&amp;\cdots &amp;0\\
+    0&amp;0&amp;A_3&amp;\cdots &amp;0\\
+    \vdots&amp;\vdots&amp;\vdots&amp;\vdots&amp;\vdots\\
+    0&amp;0&amp;0&amp;\cdots&amp;A_B
+\end{bmatrix}
+,x=\begin{bmatrix}
+    x_1\\
+    x_2\\
+    x_3\\
+    \vdots\\
+    x_B
+\end{bmatrix}
+,X=\begin{bmatrix}
+    X_1&amp;0&amp;0&amp;\cdots &amp;0\\
+    0&amp;X_2&amp;0&amp;\cdots &amp;0\\
+    0&amp;0&amp;X_3&amp;\cdots &amp;0\\
+    \vdots&amp;\vdots&amp;\vdots&amp;\vdots&amp;\vdots\\
+    0&amp;0&amp;0&amp;\cdots&amp;X_B
+\end{bmatrix}\end{split}\]</div>
+<p>We provide our DataLoader as part of PygHO. It has compatible parameters
+with PyTorch’s DataLoader and combines sparse tensors for different
+graphs:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pygho.subgdata</span> <span class="kn">import</span> <span class="n">SpDataloader</span>
+<span class="n">trn_dataloader</span> <span class="o">=</span> <span class="n">SpDataloader</span><span class="p">(</span><span class="n">trn_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using this DataLoader is similar to an ordinary PyG DataLoader:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+    <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">non_blocking</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, in addition to PyG batch attributes (like <code class="docutils literal notranslate"><span class="pre">edge_index</span></code>,
+<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">batch</span></code>), this batch also contains a SparseTensor adjacency
+matrix <code class="docutils literal notranslate"><span class="pre">A</span></code> and initial tuple feature SparseTensor <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p>
+<section id="learning-methods-on-graphs">
+<h3>Learning Methods on Graphs<a class="headerlink" href="#learning-methods-on-graphs" title="Link to this heading"></a></h3>
+<p>To execute message passing on each subgraph simultaneously, you can
+utilize the NGNNConv in our library:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Definition</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">subggnns</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span>
+            <span class="n">NGNNConv</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span> <span class="s2">&quot;SS&quot;</span><span class="p">,</span> <span class="n">mlp</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_layer</span><span class="p">)</span>
+        <span class="p">])</span>
+
+<span class="o">...</span>
+<span class="c1"># Forward pass</span>
+<span class="k">for</span> <span class="n">conv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subggnns</span><span class="p">:</span>
+    <span class="n">tX</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">datadict</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tX</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span></code> are SparseTensors representing the adjacency
+matrix and tuple representation, respectively. <code class="docutils literal notranslate"><span class="pre">X.add</span></code> implements a
+residual connection.</p>
+<p>We also provide other convolution layers, including
+<a class="reference external" href="https://arxiv.org/abs/2110.03753">GNNAK</a>,
+<a class="reference external" href="https://arxiv.org/abs/2110.02910">DSSGNN</a>,
+<a class="reference external" href="https://arxiv.org/abs/2302.07090">SSWL</a>,
+<a class="reference external" href="https://arxiv.org/abs/1905.11136">PPGN</a>,
+<a class="reference external" href="https://arxiv.org/abs/2206.11140">SUN</a>,
+<a class="reference external" href="https://arxiv.org/abs/2210.13978">I2GNN</a>, in
+<a class="reference internal" href="../modules/honn.html#module-pygho.honn.Conv" title="pygho.honn.Conv"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.Conv</span></code></a>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="datastructure.html" class="btn btn-neutral float-right" title="Basic Data Structure" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, GraphPKU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

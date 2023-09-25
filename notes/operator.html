@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operators &mdash; PyGHO 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Multiple Tensor" href="multtensor.html" />
+    <link rel="prev" title="Efficient High Order Data Processing" href="hodata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyGHO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miniexample.html">Minimal Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datastructure.html">Basic Data Structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hodata.html">Efficient High Order Data Processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Operators</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#code-architecture">Code Architecture</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#layer-1-backend">Layer 1: Backend</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spspmm">Spspmm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tuplewiseapply">TuplewiseApply</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#diagonalapply">DiagonalApply</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#layer-2-operators">Layer 2: Operators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sparse-opmessagepassing">Sparse OpMessagePassing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multtensor.html">Multiple Tensor</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/backend.html">pygho.backend package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/hodata.html">pygho.hodata package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/honn.html">pygho.honn package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyGHO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Operators</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/operator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="operators">
+<span id="operator-label"></span><h1>Operators<a class="headerlink" href="#operators" title="Link to this heading"></a></h1>
+<p>In this section, we’ll provide a detailed introduction of some basic
+operators on high order tensors.</p>
+<section id="code-architecture">
+<h2>Code Architecture<a class="headerlink" href="#code-architecture" title="Link to this heading"></a></h2>
+<p>The code for these
+high-order graph neural network (HOGNN) operations is organized into
+three layers:</p>
+<p><strong>Layer 1: Backend:</strong> This layer, found in the <a class="reference internal" href="../modules/backend.html#module-pygho.backend" title="pygho.backend"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.backend</span></code></a> module,
+contains basic data structures and operations focused on tensor
+manipulations. It lacks graph-specific learning concepts and includes
+the following functionalities:</p>
+<ul class="simple">
+<li><p><strong>Matrix multiplication:</strong> This method supports general matrix
+multiplication capabilities, including operations on two
+SparseTensors, one sparse and one MaskedTensor, and two
+MaskedTensors. It also handles batched matrix multiplication and
+offers operations that replace the sum in traditional matrix
+multiplication with max and mean operations.</p></li>
+<li><p><strong>Two matrix addition:</strong> Operations for adding two sparse or two
+dense matrices.</p></li>
+<li><p><strong>Reduce operations:</strong> These operations include sum, mean, max, and
+min, which reduce dimensions in tensors.</p></li>
+<li><p><strong>Expand operation:</strong> This operation adds new dimensions to tensors.</p></li>
+<li><p><strong>Tuplewise apply(func):</strong> It applies a given function to the
+underlying data tensor.</p></li>
+<li><p><strong>Diagonal apply(func):</strong> This operation applies a function to
+diagonal elements of tensors.</p></li>
+</ul>
+<p><strong>Layer 2: Graph operations:</strong> Building upon Layer 1, the
+<a class="reference internal" href="../modules/honn.html#module-pygho.honn.SpOperator" title="pygho.honn.SpOperator"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.SpOperator</span></code></a> and <a class="reference internal" href="../modules/honn.html#module-pygho.honn.MaOperator" title="pygho.honn.MaOperator"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.MaOperator</span></code></a> modules provide
+graph operations specifically tailored for Sparse and Masked Tensor
+structures. Additionally, the <a class="reference internal" href="../modules/honn.html#module-pygho.honn.TensorOp" title="pygho.honn.TensorOp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.TensorOp</span></code></a> layer wraps these
+operators, abstracting away the differences between Sparse and Masked
+Tensor data structures. These operations encompass:</p>
+<ul class="simple">
+<li><p><strong>General message passing between tuples:</strong> Facilitating message
+passing between tuples of nodes.</p></li>
+<li><p><strong>Pooling:</strong> This operation reduces high-order tensors to lower-order
+ones by summing, taking the maximum, or computing the mean across
+specific dimensions.</p></li>
+<li><p><strong>Diagonal:</strong> It reduces high-order tensors to lower-order ones by
+extracting diagonal elements.</p></li>
+<li><p><strong>Unpooling:</strong> This operation extends low-order tensors to high-order
+ones.</p></li>
+</ul>
+<p><strong>Layer 3: Models:</strong> Building on Layer 2, this layer provides a
+collection of representative high-order GNN layers, including NGNN,
+GNNAK, DSSGNN, SUN, SSWL, PPGN, and I2GNN. Layer 3 offers numerous
+ready-to-use methods, and with Layer 2, users can design additional
+models using general graph operations. Layer 1 allows for the
+development of novel operations, expanding the library’s flexibility and
+utility. Now let’s explore these layers in more detail.</p>
+<section id="layer-1-backend">
+<h3>Layer 1: Backend<a class="headerlink" href="#layer-1-backend" title="Link to this heading"></a></h3>
+<section id="spspmm">
+<h4>Spspmm<a class="headerlink" href="#spspmm" title="Link to this heading"></a></h4>
+<p>One of the most complex operators in this layer is sparse-sparse matrix
+multiplication (Spspmm). Given two sparse matrices, C and D, and
+assuming their output is B:</p>
+<div class="math notranslate nohighlight">
+\[B_{ij} = \sum_k C_{ik} D_{kj}\]</div>
+<p>The Spspmm operator utilizes a coo format to represent elements.
+Assuming element C_{ik} corresponds to C.values[c_{ik}] and D_{kj}
+corresponds to D.values[d_{kj}], we can create a tensor <code class="docutils literal notranslate"><span class="pre">bcd</span></code> of
+shape (3, m), where m is the number of pairs (i, j, k) where both
+C_{ik} and D_{kj} exist. The multiplication can be performed as
+follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">B</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="n">B</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">bcd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">bcd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="n">D</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">bcd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>This summation process can be efficiently implemented in parallel on GPU
+using <code class="docutils literal notranslate"><span class="pre">torch.Tensor.scatter_reduce_</span></code>. The <code class="docutils literal notranslate"><span class="pre">bcd</span></code> tensor can be
+precomputed with <a class="reference internal" href="../modules/backend.html#pygho.backend.Spspmm.spspmm_ind" title="pygho.backend.Spspmm.spspmm_ind"><code class="xref py py-func docutils literal notranslate"><span class="pre">pygho.backend.Spspmm.spspmm_ind()</span></code></a> and shared among
+matrices with the same indices.</p>
+<p>Hadamard product between two sparse matrices can also be implemented,
+where <span class="math notranslate nohighlight">\(C = A \odot B\)</span>: C can use the same indice as <span class="math notranslate nohighlight">\(A\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">a_</span><span class="p">{</span><span class="n">ij</span><span class="p">}]</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">a_</span><span class="p">{</span><span class="n">ij</span><span class="p">}]</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">b_</span><span class="p">{</span><span class="n">ij</span><span class="p">}]</span>
+</pre></div>
+</div>
+<p>The tensor <code class="docutils literal notranslate"><span class="pre">b2a</span></code> can be defined, where <code class="docutils literal notranslate"><span class="pre">b2a[b_ij]</span> <span class="pre">=</span> <span class="pre">a_ij</span></code> if A has
+the element (i, j); otherwise, it is set to -1. Then, the Hadamard
+product can be computed as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">nnz</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">b2a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">b2a</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The operation can also be efficiently implemented in parallel on a GPU.</p>
+<p>To compute <span class="math notranslate nohighlight">\(A\odot (CD)\)</span>, you can define a tensor <code class="docutils literal notranslate"><span class="pre">acd</span></code> of shape
+(3, m’) where <code class="docutils literal notranslate"><span class="pre">acd[0]</span> <span class="pre">=</span> <span class="pre">b2a[bcd[0]]</span></code>, <code class="docutils literal notranslate"><span class="pre">acd[1]</span> <span class="pre">=</span> <span class="pre">bcd[1]</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">acd[2]</span> <span class="pre">=</span> <span class="pre">bcd[2]</span></code>, and remove columns i where <code class="docutils literal notranslate"><span class="pre">acd[0,</span> <span class="pre">i]</span> <span class="pre">=</span> <span class="pre">-1</span></code>. The
+computation can be done as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ret</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">acd</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">acd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">A</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">acd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="n">B</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">acd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span> <span class="o">*</span> <span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">acd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Like the previous operations, this can also be implemented efficiently
+in parallel on a GPU. Additionally, by setting <code class="docutils literal notranslate"><span class="pre">A.values[acd[0,</span> <span class="pre">i]]</span></code>
+to 1, A can act as a mask, ensuring that only elements existing in A are
+computed.</p>
+<p>The overall wrapper for these functions is <code class="xref py py-func docutils literal notranslate"><span class="pre">pygho.honn.Spspmm.spspmm()</span></code>,
+which can perform sparse-sparse matrix multiplication with precomputed
+indices. <code class="xref py py-func docutils literal notranslate"><span class="pre">pygho.honn.Spspmm.spspmpnn()</span></code> provides a more complex operator
+that goes beyond matrix multiplication, allowing you to implement
+various graph operations. It can in fact implement the following
+framework.</p>
+<div class="math notranslate nohighlight">
+\[ret_{ij} = \phi(\{(A_{ij}, B_{ik}, C_{kj})|B_{ik},C_{kj} \text{ elements exist}\})\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">phi</span></code> is a general multiset function, which is a functional
+parameter of <code class="docutils literal notranslate"><span class="pre">spspmpnn</span></code>. For example, with it, we can implement GAT on each
+subgraph as follows.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">attentionnn1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">attentionnn2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">attentionnn3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">subggnn</span> <span class="o">=</span> <span class="n">NGNNConv</span><span class="p">(</span><span class="n">hiddim</span><span class="p">,</span> <span class="n">hiddim</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">aggr</span><span class="p">,</span>
+               <span class="s2">&quot;SS&quot;</span><span class="p">,</span> <span class="n">transfermlpparam</span><span class="p">(</span><span class="n">mlp</span><span class="p">),</span>
+               <span class="n">message_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">tarid</span><span class="p">:</span>
+                  <span class="n">scatter_softmax</span><span class="p">(</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">attentionnn1</span> <span class="o">*</span> <span class="n">b</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">attention2</span><span class="p">(</span><span class="n">c</span><span class="p">),</span>
+                     <span class="n">tarid</span><span class="p">)</span>
+                     <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">attentionnn3</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="tuplewiseapply">
+<h4>TuplewiseApply<a class="headerlink" href="#tuplewiseapply" title="Link to this heading"></a></h4>
+<p>Both Sparse and Masked Tensors have the <code class="docutils literal notranslate"><span class="pre">tuplewiseapply</span></code> function. The
+most common usage is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mlp</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">X</span><span class="o">.</span><span class="n">tuplewiseapply</span><span class="p">(</span><span class="n">mlp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>However, in practice, this function directly applies the values or data
+tensor to <code class="docutils literal notranslate"><span class="pre">mlp</span></code>. As linear layers, non-linearities, and layer
+normalization all operate on the last dimension, this operation is
+essentially equivalent to tuplewise apply. For batchnorm, we provide a
+version that not affected by this problem in <a class="reference internal" href="../modules/honn.html#module-pygho.honn.utils" title="pygho.honn.utils"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.utils</span></code></a>.</p>
+</section>
+<section id="diagonalapply">
+<h4>DiagonalApply<a class="headerlink" href="#diagonalapply" title="Link to this heading"></a></h4>
+<p>Both Sparse and Masked Tensors have the <code class="docutils literal notranslate"><span class="pre">diagonalapply</span></code> function.
+Unlike <code class="docutils literal notranslate"><span class="pre">tuplewiseapply</span></code>, this function passes both data/values and a
+mask indicating whether the corresponding elements are on the diagonal
+to the input function. A common use case is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mlp1</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">mlp2</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">diagonalmask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diagonalmask</span><span class="p">,</span> <span class="n">mlp1</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">mlp2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">X</span><span class="o">.</span><span class="n">diagonalapply</span><span class="p">(</span><span class="n">mlp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">mlp1</span></code> is applied to diagonal elements, and <code class="docutils literal notranslate"><span class="pre">mlp2</span></code> is applied
+to non-diagonal elements. You can also use
+<code class="docutils literal notranslate"><span class="pre">torch_geometric.nn.HeteroLinear</span></code> for a faster implementation.</p>
+</section>
+</section>
+<section id="layer-2-operators">
+<h3>Layer 2: Operators<a class="headerlink" href="#layer-2-operators" title="Link to this heading"></a></h3>
+<p><a class="reference internal" href="../modules/honn.html#module-pygho.honn.SpOperator" title="pygho.honn.SpOperator"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.SpOperator</span></code></a> and <a class="reference internal" href="../modules/honn.html#module-pygho.honn.MaOperator" title="pygho.honn.MaOperator"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.MaOperator</span></code></a> wrap the backend
+for SparseTensor and MaskedTensor separately. Their APIs are unified in
+<a class="reference internal" href="../modules/honn.html#module-pygho.honn.TensorOp" title="pygho.honn.TensorOp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pygho.honn.TensorOp</span></code></a>. The basic operators include
+<code class="docutils literal notranslate"><span class="pre">OpNodeMessagePassing</span></code> (node-level message passing),
+<code class="docutils literal notranslate"><span class="pre">OpMessagePassing</span></code> (tuple-level message passing, wrapping matrix
+multiplication), <code class="docutils literal notranslate"><span class="pre">OpPooling</span></code> (reduce high-order tensors to lower-order
+ones by sum, mean, max), <code class="docutils literal notranslate"><span class="pre">OpDiag</span></code> (reduce high-order tensors to
+lower-order ones by extracting diagonal elements), and <code class="docutils literal notranslate"><span class="pre">OpUnpooling</span></code>
+(extend lower-order tensors to higher-order ones). Special cases are
+also defined.</p>
+<section id="sparse-opmessagepassing">
+<h4>Sparse OpMessagePassing<a class="headerlink" href="#sparse-opmessagepassing" title="Link to this heading"></a></h4>
+<p>As described in Layer 1, the <code class="docutils literal notranslate"><span class="pre">OpMessagePassing</span></code> operator wraps the
+properties of Spspmm and is defined with parameters like <code class="docutils literal notranslate"><span class="pre">op0</span></code>,
+<code class="docutils literal notranslate"><span class="pre">op1</span></code>, <code class="docutils literal notranslate"><span class="pre">dim1</span></code>, <code class="docutils literal notranslate"><span class="pre">op2</span></code>, <code class="docutils literal notranslate"><span class="pre">dim2</span></code>, and <code class="docutils literal notranslate"><span class="pre">aggr</span></code>. It retrieves
+precomputed data from a data dictionary during the forward process using
+keys like <code class="docutils literal notranslate"><span class="pre">f&quot;{op0}___{op1}___{dim1}___{op2}___{dim2}&quot;</span></code>. Here’s the
+forward method signature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">A</span><span class="p">:</span> <span class="n">SparseTensor</span><span class="p">,</span>
+            <span class="n">B</span><span class="p">:</span> <span class="n">SparseTensor</span><span class="p">,</span>
+            <span class="n">datadict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+            <span class="n">tarX</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SparseTensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseTensor</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>In this signature, <code class="docutils literal notranslate"><span class="pre">tarX</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">op0</span></code>, providing the target
+indices, while <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">B</span></code> correspond to <code class="docutils literal notranslate"><span class="pre">op1</span></code> and <code class="docutils literal notranslate"><span class="pre">op2</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">datadict</span></code> can be obtained from the data loader using
+<code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">batch</span> <span class="pre">in</span> <span class="pre">dataloader:</span> <span class="pre">batch.to_dict()</span></code>.</p>
+</section>
+</section>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>To illustrate how these operators work, let’s use NGNN as an example.
+Although our operators can handle batched data, for simplicity, we’ll
+focus on the single-graph case. Let H represent the representation
+matrix in <span class="math notranslate nohighlight">\(\mathbb{R}^{n\times n\times d}\)</span>, and A denote the
+adjacency matrix in <span class="math notranslate nohighlight">\(\mathbb{R}^{n\times n}\)</span>. The Graph
+Isomorphism Network (GIN) operation on all subgraphs can be defined as:</p>
+<div class="math notranslate nohighlight">
+\[h_{ij} \leftarrow \sum_{k\in N_i(j)} \text{MLP}(h_{ik})\]</div>
+<p>This operation can be represented using two steps:</p>
+<ol class="arabic simple">
+<li><p>Apply the MLP function to each tuple’s representation:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="s1">&#39; = X.tuplewiseapply(MLP)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Perform matrix multiplication to sum over neighbors:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="s1">&#39; * A^T</span>
+</pre></div>
+</div>
+<p>In the matrix multiplication step, batching is applied to the last
+dimension of X. This conversion may seem straightforward, but there are
+several key points to consider:</p>
+<ul class="simple">
+<li><p>Optimization for induced subgraph input: The original equation
+involves a sum over neighbors in the subgraph, but the matrix
+multiplication version includes neighbors from the entire graph.
+However, our implementation optimizes for induced subgraph cases,
+where neighbors outside the subgraph are automatically handled by
+setting their values to zero.</p></li>
+<li><p>Optimization for sparse output: The operation X’ * A^T may produce
+non-zero elements for pairs (i, j) that do not exist in the subgraph.
+For sparse input tensors X and A, we optimize the multiplication to
+avoid computing such non-existent elements.</p></li>
+</ul>
+<p>Pooling processes can also be considered as a reduction of <span class="math notranslate nohighlight">\(X\)</span>.
+For instance:</p>
+<div class="math notranslate nohighlight">
+\[h_i=\sum_{j\in V_i}\text{MLP}_2(h_{ij})\]</div>
+<p>can be implemented as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># definition</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">OpPoolingSubg2D</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="c1"># forward</span>
+<span class="n">Xn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">tuplewiseapply</span><span class="p">(</span><span class="n">MLP_1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This example demonstrate how our library’s operators can be used to
+efficiently implement various HOGNNs.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="hodata.html" class="btn btn-neutral float-left" title="Efficient High Order Data Processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multtensor.html" class="btn btn-neutral float-right" title="Multiple Tensor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, GraphPKU.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

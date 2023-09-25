@@ -242,12 +242,13 @@ specific precomputation. For example, consider the key:</p>
 <p>Here, the precomputation involves sparse matrix multiplication
 <span class="math notranslate nohighlight">\(AX\)</span>, but only computes the output elements that exist in
 <span class="math notranslate nohighlight">\(X\)</span>. These precomputation results can be shared among matrices
-with the same indices. The key elements signify the following: - The
-first <code class="docutils literal notranslate"><span class="pre">X</span></code> refers to the target sparse matrix indices. - <code class="docutils literal notranslate"><span class="pre">A</span></code> and
-<code class="docutils literal notranslate"><span class="pre">X</span></code> represent the matrices involved in the multiplication, the
-adjacency matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>, and the tuple feature <code class="docutils literal notranslate"><span class="pre">X</span></code>. - <code class="docutils literal notranslate"><span class="pre">1</span></code> denotes
-that dimension <code class="docutils literal notranslate"><span class="pre">1</span></code> of <code class="docutils literal notranslate"><span class="pre">A</span></code> will be reduced. - <code class="docutils literal notranslate"><span class="pre">0</span></code> signifies that
-dimension <code class="docutils literal notranslate"><span class="pre">0</span></code> of <code class="docutils literal notranslate"><span class="pre">X</span></code> will be reduced.</p>
+with the same indices. The key elements signify the following:</p>
+<ul class="simple">
+<li><p>The first <code class="docutils literal notranslate"><span class="pre">X</span></code> refers to the target sparse matrix indices.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">X</span></code> represent the matrices involved in the multiplication, the adjacency matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>, and the tuple feature <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> denotes that dimension <code class="docutils literal notranslate"><span class="pre">1</span></code> of <code class="docutils literal notranslate"><span class="pre">A</span></code> will be reduced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> signifies that dimension <code class="docutils literal notranslate"><span class="pre">0</span></code> of <code class="docutils literal notranslate"><span class="pre">X</span></code> will be reduced.</p></li>
+</ul>
 <p>You don’t need to manually feed the precomputation results to the model.
 Converting the batch to a dictionary and using it as the <code class="docutils literal notranslate"><span class="pre">datadict</span></code>
 parameter is sufficient:</p>
